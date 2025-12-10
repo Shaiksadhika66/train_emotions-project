@@ -2,119 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Emotion Chatbot 🤖</title>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #6a11cb, #2575fc);
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .chat-container {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            padding: 25px;
-            border-radius: 15px;
-            width: 400px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            text-align: center;
-        }
-
-        h2 {
-            margin-bottom: 20px;
-            color: #ffeaa7;
-            text-shadow: 1px 1px 2px #000;
-        }
-
-        .messages {
-            background: rgba(0,0,0,0.2);
-            height: 300px;
-            border-radius: 10px;
-            overflow-y: auto;
-            padding: 10px;
-            margin-bottom: 15px;
-            text-align: left;
-        }
-
-        .user, .bot {
-            margin: 10px 0;
-            padding: 10px;
-            border-radius: 10px;
-            display: inline-block;
-            max-width: 80%;
-        }
-
-        .user {
-            background-color: #74b9ff;
-            align-self: flex-end;
-            float: right;
-            clear: both;
-        }
-
-        .bot {
-            background-color: #55efc4;
-            float: left;
-            clear: both;
-        }
-
-        input {
-            width: 75%;
-            padding: 10px;
-            border: none;
-            border-radius: 10px;
-            outline: none;
-        }
-
-        button {
-            background-color: #fd79a8;
-            border: none;
-            color: white;
-            padding: 10px 15px;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            background-color: #e84393;
-        }
-    </style>
+    <title>AI Emotion Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
+
 <body>
-    <div class="chat-container">
-        <h2>💬 AI Emotion Chatbot 🤖</h2>
-        <div class="messages" id="chat-box"></div>
-        <input id="message" type="text" placeholder="Type your message..." />
-        <button onclick="sendMessage()">Send</button>
+
+<div class="container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>💬 Chats</h2>
+        <ul id="chatList">
+            <li class="active">Current Chat</li>
+        </ul>
     </div>
 
-    <script>
-        async function sendMessage() {
-            const input = document.getElementById("message");
-            const message = input.value.trim();
-            if (!message) return;
+    <!-- Main Chat Area -->
+    <div class="chat-area">
+        <div id="chatBox" class="chat-box"></div>
 
-            const chatBox = document.getElementById("chat-box");
-            chatBox.innerHTML += `<div class='user'>👤 ${message}</div>`;
+        <div class="input-area">
+            <input id="userInput" type="text" placeholder="Type your message...">
+            <button onclick="sendMessage()">Send</button>
+        </div>
+    </div>
 
-            input.value = "";
+</div>
 
-            const res = await fetch("/chat", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ message })
-            });
+<script>
+async function sendMessage() {
+    let text = document.getElementById("userInput").value;
+    if (!text.trim()) return;
 
-            const data = await res.json();
-            chatBox.innerHTML += `<div class='bot'>🤖 (${data.emotion}) ${data.reply}</div>`;
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-    </script>
+    // Show user message
+    let chatBox = document.getElementById("chatBox");
+    chatBox.innerHTML += `<div class='msg user'>${text}</div>`;
+
+    document.getElementById("userInput").value = "";
+
+    // Send to backend
+    let res = await fetch("/get_emotion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+    });
+
+    let data = await res.json();
+
+    // Show bot message
+   chatBox.innerHTML += `<div class='msg bot'>🤖 (${data.emotion}) ${data.reply}</div>`;
+   chatBox.scrollTop = chatBox.scrollHeight;
+}
+</script>
+
 </body>
 </html>
